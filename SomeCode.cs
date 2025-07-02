@@ -26,13 +26,16 @@ public class User
 public class UserService 
 {
 	private readonly EmailService _emailService = new EmailService();
-	
+	private int syncObj = 1;
     public async Task CreateUser(string username)
     {
-         var connection = new SqlConnection(ConnectionString); 
-         var command = new SqlCommand($"INSERT INTO Users (Username) VALUES ('{username}')", connection); 
-         connection.Open();
-         command.ExecuteNonQuery(); 
+	    lock (syncObj)
+	    {
+		    var connection = new SqlConnection(ConnectionString);
+		    var command = new SqlCommand($"INSERT INTO Users (Username) VALUES ('{username}')", connection);
+		    connection.Open();
+		    await command.ExecuteNonQueryAsync();
+	    }
     }
 
     public void CreateUsers(List<User> users)
